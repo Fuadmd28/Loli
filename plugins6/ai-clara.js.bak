@@ -1,0 +1,25 @@
+import { post } from '../lib/api.js'
+
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+  if (!text) throw 'Apa Yang Ingin Kamu Tanyakan?'
+  try {
+const { data } = await post("/cai/chat", {
+			character_id: "8b26fdfc-8b11-4b1c-8a7a-51b61cf5f4f0",
+			message: text,
+			enable_nsfw: false,
+			model: "rs_v8_72b",
+		})
+		const { status, message, result } = data
+		m.reply(result.message)
+		} catch (e) {
+conn.sendFile(m.chat, eror, "anu.mp3", null, m, true, {
+		type: "audioMessage",
+		ptt: true,
+	})
+}}
+handler.help = ['clara','cai']
+handler.tags = ['ai']
+handler.command = /^(clara|cai)$/i
+handler.limit = true
+
+export default handler
