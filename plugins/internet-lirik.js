@@ -1,35 +1,30 @@
-import axios from 'axios';
+import fetch from "node-fetch";
 
-const handler = async (m, {
-    conn,
-    text,
-    usedPrefix,
-    command
-}) => {
-    const teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : '';
-    if (!teks) throw `Ex: ${usedPrefix}${command} Jiwa yang bersedih`;
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+    if (!text) throw `Ex: ${usedPrefix}${command} Jiwa yang bersedih`;
     try {
-        const result = await lirik(text);
+        const response = await fetch(`https://api.betabotz.eu.org/api/search/lirik?lirik=${text}&apikey=${lann}`);
+        const data = await response.json();
         const caption = `
-${result.lyrics}
+${data.result.lyrics}
 
 ℹ️ More info:
-🔗 ${result.url}
-🎤 Artist: ${result.artistName}
-📅 Released: ${result.releasedAt}`;
+🔗 ${data.result.image}
+🎤 Artist: ${data.result.artist}`;
         await conn.relayMessage(m.chat, {
-            extendedTextMessage:{
-                text: caption, 
+            extendedTextMessage: {
+                text: caption,
                 contextInfo: {
-                     externalAdReply: {
-                        title: `🎵 ${result.title} - ${result.artist} 🎵`,
+                    externalAdReply: {
+                        title: `🎵 ${data.result.title} - ${data.result.artist} 🎵`,
                         mediaType: 1,
                         previewType: 0,
                         renderLargerThumbnail: true,
-                        thumbnailUrl: result.thumbnail,
-                        sourceUrl: 'https://aemt.me'
+                        thumbnailUrl: data.result.image,
+                        sourceUrl: ''
                     }
-                }, mentions: [m.sender]
+                },
+                mentions: [m.sender]
             }
         }, {});
     } catch (e) {
@@ -43,34 +38,3 @@ handler.tags = ['internet'];
 handler.command = /^(lirik|lyrics|lyric)$/i;
 
 export default handler;
-
-async function lirik(q) {
-    try {
-        const searches = await axios.get(`https://aemt.me/lirik?text=${q}`);
-     
-        const result = searches.data.result;
-        const data = {
-            lyrics: result.lyrics,
-            thumbnail: result.thumbnail,
-            title: result.title,
-            artist: result.artist,
-            image: result.image,
-            fullTitle: result.fullTitle,
-            featuredTitle: result.featuredTitle,
-            url: result.url,
-            artistName: result.artistName,
-            artistUrl: result.artistUrl,
-            artistThumbnail: result.artistThumbnail,
-            artistImage: result.artistImage,
-            releasedAt: result.releasedAt,
-            instrumental: result.instrumental,
-            iq: result.iq,
-            stats: result.stats,
-            releaseDateForDisplay: result.releaseDateForDisplay,
-            releaseDateWithAbbreviatedMonthForDisplay: result.releaseDateWithAbbreviatedMonthForDisplay
-        };
-        return data;
-    } catch (error) {     
-        return { error: 'Internal server error!' };
-    }
-              }
