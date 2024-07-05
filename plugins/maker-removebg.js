@@ -47,5 +47,5 @@ async function nobg(url) {
 }
 
 const apikey = [
-    'GataDios',
+    'lofi',
 ]
