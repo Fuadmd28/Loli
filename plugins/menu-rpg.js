@@ -183,7 +183,7 @@ let tags = {
     throw e
   }
 }
-handler.tags = ['menulist']
+handler.tags = ['pedo']
 handler.help = ['rpg']
 handler.command = /^(rpg|\?)$/i
 
