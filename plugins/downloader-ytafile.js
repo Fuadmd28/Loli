@@ -30,7 +30,7 @@ var handler = async (m, { conn, args }) => {
 
 // Jika ingin menambahkan tag, ubah code berikut:
 handler.tags = ['downloader'];
-handler.help = ['yta', 'ytdoc','ytaudio'];
-handler.command = /^(yta|ytdoc|ytaudio)$/i;
+handler.help = ['ytdoc', 'ytdoc','ytaudio'];
+handler.command = /^(ytdoc)$/i;
 handler.limit = true;
 export default handler;
