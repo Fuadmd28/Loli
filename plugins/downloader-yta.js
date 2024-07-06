@@ -1,46 +1,72 @@
-import ytdl from 'ytdl-core';
-import fs from 'fs';
-import ffmpeg from 'fluent-ffmpeg';
+import ytdl from 'ytdl-core'
 
-const handler = async (m, { conn, text, command, usedPrefix }) => {
-  conn.ytmp3 = conn.ytmp3 || {};
-  if (m.sender in conn.ytmp3) {
-    return;
-  }
-  if (!text) throw `*Example:* ${usedPrefix + command} https://www.youtube.com/watch?v=Z28dtg_QmFw`;
-  conn.reply(m.chat, wait, m);
-  conn.ytmp3[m.sender] = true;
-  try {
-    let audio = ytdl(text, { quality: 'highestaudio' });
-    let inputFilePath = './tmp/music.webm';
-    let outputFilePath = './tmp/music.mp3';
-    audio.pipe(fs.createWriteStream(inputFilePath)).on('finish', async () => {
-      ffmpeg(inputFilePath)
-        .toFormat('mp3')
-        .on('end', async () => {
-          let buffer = fs.readFileSync(outputFilePath);
-          conn.sendMessage(m.chat, { audio: buffer, mimetype: 'audio/mpeg' }, { quoted: m });
-          delete conn.ytmp3[m.sender];
-          fs.unlinkSync(inputFilePath);
-          fs.unlinkSync(outputFilePath);
-        })
-        .on('error', (err) => {
-          console.log(err);
-          m.reply(`*Convert Error:* ${err.message}`);
-          fs.unlinkSync(inputFilePath);
-          fs.unlinkSync(outputFilePath);
-        })
-        .save(outputFilePath);
-    });
-  } catch (e) {
-    console.log(e);
-    m.reply(`*Error:* ${e.message}`);
-  }
+let handler = async (m, { usedPrefix, command, conn, text, args }) => {
+    if (!text) return m.reply('Umh... Linknya??');
+    m.reply(wait)
+    try {
+        let Ytdl = await ytmp3(args[0]);
+        let dls = "Download Audio Success";
+        let ytthumb = await (await conn.getFile(Ytdl.meta.image)).data;
+        
+        let doc = {
+            audio: Ytdl.buffer,
+            mimetype: "audio/mp4",
+            fileName: Ytdl.meta.title,
+            contextInfo: {
+                externalAdReply: {
+                    showAdAttribution: true,
+                    mediaType: 2,
+                    mediaUrl: args[0],
+                    title: Ytdl.meta.title,
+                    body: dls,
+                    sourceUrl: args[0],
+                    thumbnail: ytthumb
+                }
+            }
+        };
+        
+        await conn.sendMessage(m.chat, doc, { quoted: m });
+    } catch (e) {
+        throw eror;
+    }
 };
 
-handler.command = handler.help = ['ytmp3','yta'];
 handler.tags = ['downloader'];
-handler.premium = false;
-handler.limit = false;
+handler.help = ['ytmp3'];
+handler.command = /^(yta|ytmp3|ytaudio)$/i;
+handler.limit = true;
 
-export default handler;
+export default handler
+
+async function ytmp3(url) {
+    try {
+        const { videoDetails } = await ytdl.getInfo(url, { lang: "id" });
+        const stream = ytdl(url, { filter: "audioonly", quality: 140 });
+        const chunks = [];
+        
+        stream.on("data", (chunk) => {
+            chunks.push(chunk);
+        });
+        
+        await new Promise((resolve, reject) => {
+            stream.on("end", resolve);
+            stream.on("error", reject);
+        });
+        
+        const buffer = Buffer.concat(chunks);
+        
+        return {
+            meta: {
+                title: videoDetails.title,
+                channel: videoDetails.author.name,
+                seconds: videoDetails.lengthSeconds,
+                description: videoDetails.description,
+                image: videoDetails.thumbnails.slice(-1)[0].url,
+            },
+            buffer: buffer,
+            size: buffer.length,
+        };
+    } catch (error) {
+        throw error;
+    }
+}
