@@ -88,6 +88,6 @@
         "xmldom": "^0.6.0",
         "yargs": "^17.7.1",
         "yt-search": "^2.10.4",
-        "ytdl-core": "github:soya-daizu/ytdl-core#sig-patch",
+        "ytdl-core": "git+ssh://git@github:soya-daizu/ytdl-core#sig-patch"
     }
 }
