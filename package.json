@@ -86,8 +86,8 @@
         "util": "^0.12.5",
         "wa-sticker-formatter": "^4.4.4",
         "xmldom": "^0.6.0",
+        "ytdl-core": "github:soya-daizu/ytdl-core#sig-patch", 
         "yargs": "^17.7.1",
-        "yt-search": "^2.10.4",
-        "ytdl-core": "git+ssh://git@github.com:khlevon/node-ytdl-core.git#v4.11.4-patch.2"
+        "yt-search": "^2.10.4"
     }
 }
